@@ -23,12 +23,12 @@ jobs:
       - name: Set up WireGuard Connection
         uses: niklaskeerl/easy-wireguard-action@v2
         with:
-            WG_CONFIG_FILE: ${{ secrets.WIREGUARD_CONFIG }}
+          WG_CONFIG_FILE: ${{ secrets.WIREGUARD_CONFIG }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
 
-      - name: Configure kubeconfigfile.
+      - name: Configure Kube-Config file.
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
@@ -36,7 +36,9 @@ jobs:
 
       - name: Deploy to Dev Cluster
         run: |
-          echo "NAMESPACE=${{ secrets.NAMESPACE }}"
-          echo "POD=${{ secrets.POD }}"
-          kubectl delete pod -n ${{ secrets.NAMESPACE }}" $(kubectl get pods -n ${{ secrets.NAMESPACE }}" | grep ${{ secrets.POD }} | awk '{print $1}')
-          
+          kubectl delete pod -n ${{ secrets.NAMESPACE }} $(kubectl get pods -n ${{ secrets.NAMESPACE }} | grep ${{ secrets.POD }} | awk '{print $1}')
+
+      - name: Upgrade Base Registry
+        run: |
+          kubectl exec -it $(kubectl get pods -n ${{ secrets.NAMESPACE }} | grep ${{ secrets.POD }} | awk '{print $1}') -n ${{ secrets.NAMESPACE }} /bin/bash -c ". /opt/bitnami/odoo/venv/bin/activate && /opt/bitnami/odoo/bin/odoo -c /opt/bitnami/odoo/conf/odoo.conf -u base --stop-after-init" --wait
+          kubectl delete pod -n ${{ secrets.NAMESPACE }} $(kubectl get pods -n ${{ secrets.NAMESPACE }} | grep ${{ secrets.POD }} | awk '{print $1}')
