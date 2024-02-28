@@ -1,0 +1,42 @@
+name: Deploy OpenG2P to Dev Cluster
+
+on:
+  workflow_dispatch:
+    inputs:
+      packageName:
+        description: 'Package Name'
+        required: true
+        default: '15.0-develop'
+        type: choice
+        options:
+          - "*"
+          - 15.0-develop
+
+jobs:
+  deploy-to-dev-cluster:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up WireGuard Connection
+        uses: niklaskeerl/easy-wireguard-action@v2
+        with:
+            WG_CONFIG_FILE: ${{ secrets.WIREGUARD_CONFIG }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+
+      - name: Configure kubeconfigfile.
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to Dev Cluster
+        run: |
+          echo "NAMESPACE=${{ secrets.NAMESPACE }}"
+          echo "POD=${{ secrets.POD }}"
+          kubectl delete pod -n ${{ secrets.NAMESPACE }}" $(kubectl get pods -n ${{ secrets.NAMESPACE }}" | grep ${{ secrets.POD }} | awk '{print $1}')
+          
