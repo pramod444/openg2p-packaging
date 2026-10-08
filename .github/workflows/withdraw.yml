@@ -81,10 +81,10 @@ on:
         default: ''
 
 env:
-  HELM_REPO: openg2p/openg2p-helm
+  HELM_REPO: pramod444/openg2p-helm
   HELM_BRANCH: gh-pages
-  HELM_URL: https://openg2p.github.io/openg2p-helm
-  CHANGELOG_REPO: openg2p/versions
+  HELM_URL: https://pramod444.github.io/openg2p-helm
+  CHANGELOG_REPO: pramod444/versions
   CHANGELOG_BRANCH: develop
 
 jobs:
